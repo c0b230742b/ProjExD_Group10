@@ -104,15 +104,15 @@ class BeamAllen:
     """
     アレンが放つビームに関するクラス
     """
-    def __init__(self, bird:"Bird"):
+    def __init__(self, Allen:"Allen"):
         """
         ビーム画像Surfaceを生成する
-        引数 bird：ビームを放つこうかとん（Birdインスタンス）
+        引数 Allen：ビームを放つアレン（Allenインスタンス）
         """
         self.img = pg.image.load(f"fig/beam.png")
         self.rct = self.img.get_rect()
-        self.rct.centery = bird.rct.centery  # こうかとんの中心縦座標をビームの中心縦座標に設定
-        self.rct.left = bird.rct.right  # こうかとん右座標をビーム左座標に設定
+        self.rct.centery = Allen.rct.centery  # アレンの中心縦座標をビームの中心縦座標に設定
+        self.rct.left = Allen.rct.right  # アレン右座標をビーム左座標に設定
         self.vx, self.vy = +5, 0
 
     def update(self, screen: pg.Surface):
