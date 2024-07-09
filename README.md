@@ -1,56 +1,30 @@
-import os
-import sys
-import pygame as pg
+#Dreamer - 崩れ往く世界の終わり-
 
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+## 実行環境の必要条件
+* python >= 3.10
+* pygame >= 2.1
 
+## ゲームの概要
+主人公が旅をしながら敵を倒して行くゲーム
 
-def main():
-    pg.display.set_caption("はばたけ！こうかとん")
-    screen = pg.display.set_mode((800, 600))
-    clock  = pg.time.Clock()
-    bg_img = pg.image.load("fig/pg_bg.jpg") #背景画像
-    bg_img2 = pg.transform.flip(bg_img, True, False) #背景画像
-    kk_img = pg.image.load("fig/3.png")
-    kk_img = pg.transform.flip(kk_img, True, False)
-    kk_rect = kk_img.get_rect() #こうかとんrectの抽出
-    kk_rect.center = 300, 200
-    tmr = 0
-    while True:
-        for event in pg.event.get():
-            if event.type == pg.QUIT: return
+## ゲームの遊び方
+* 矢印キーでキャラクターを移動させる、スペースキーでビーム発射
+* 敵のHPが0になったら次に進める
+* 場面によって場所が切り替わる
 
-        x = tmr%3200
-        screen.blit(bg_img, [-x, 0]) #背景画像を表すsurfase
-        screen.blit(bg_img2, [-x+1600, 0])
-        screen.blit(bg_img, [-x+3200, 0]) #背景画像を表すsurfase
-        screen.blit(bg_img2, [-x+4800, 0])
-        
-        kye_lst = pg.key.get_pressed()
-        if kye_lst[pg.K_UP]: #上矢印を押したとき
-            a = -1
-            b = -1
-        elif kye_lst[pg.K_DOWN]:
-            a = -1
-            b = +1
-        elif kye_lst[pg.K_LEFT]:
-            a = -1
-            b = 0
-        elif kye_lst[pg.K_RIGHT]:
-            a = +2
-            b = 0
-        else:
-            a = -1
-            b = 0
-        kk_rect.move_ip(a, b)
-        screen.blit(kk_img, kk_rect) #kk_imageをkk_rectの設定に従って貼り付け
-        pg.display.update()
-        tmr += 1        
-        clock.tick(200)
+## ゲームの実装
+### 共通基本機能
+* 背景画像と主人公キャラクターの描画
 
+### 担当追加機能
+* 丸焼きエフェクト（担当：ふしみ）：バーナーにより豪華豚を丸焼きにするエフェクトに関するクラス
+* キッチンタイマー機能（担当：ぷしみ）：制限時間以内に調理が完了しなかった場合に，豪華豚が脱走する機能
+* 調理機能（担当：ぶしみ）：調理器具をキー押下により選択し，豪華豚を調理する機能
 
-if __name__ == "__main__":
-    pg.init()
-    main()
-    pg.quit()
-    sys.exit()
+### ToDo
+- [ ] ほげほげ機能
+- [ ] ふがふが関数内の変数名の統一
+
+### メモ
+* クラス内の変数は，すべて，「get_変数名」という名前のメソッドを介してアクセスするように設計してある
+* すべてのクラスに関係する関数は，クラスの外で定義してある
