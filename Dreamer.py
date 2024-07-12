@@ -23,64 +23,65 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
-class Allen(pg.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pg.transform.rotozoom(pg.image.load("fig/スクリーンショット 2024-07-09 145858.png"), 0, 0.9)
+
+class Allen:
+    """
+    アレンに関するクラス
+    """
+    #キー移動に対する移動量
+    delta = {
+        pg.K_LEFT:(-10, 0),
+        pg.K_RIGHT:(10, 0)
+    }
+    #画像のロード
+    imgs = {
+        (5, 0): pg.image.load("fig/allen_file.png"),      #初期状態(正面)
+        (-10, 0): pg.image.load("fig/allen_file(0).png"), #左向き
+        (10, 0): pg.image.load("fig/allen_file(1).png")   #右向き
+    }
+    
+    def __init__(self, xy: tuple[int, int]):
+        self.img = __class__.imgs[(5, 0)] #初期画像の設定
+        self.rct:pg.Rect = self.img.get_rect() 
+        self.rct.center = xy
+        self.gravity = 0.5      #重力の設定
+        self.is_jumping = False #ジャンプ状態
+        self.jump_speed = 20    #ジャンプ速度
+    
+    def change_img(self, num: int, screen: pg.Surface):
+        #画像を変更、位置を調整して表示
+        self.image = pg.transform.rotozoom(pg.image.load(f"fig/allen_file({num}).png"), 0, 0)
         self.rect = self.image.get_rect()
-        self.rect.center = 300, 200
-        self.gravity = 1
-        self.velocity = 0
-        self.on_ground = True
+        self.rect.center = self.rct.center
+        screen.blit(self.image, self.rect)
+
     
-    def update(self):
-        keys = pg.key.get_pressed()
-        if keys[pg.K_SPACE] and self.on_ground:
-            self.velocity = self.jump_speed
-            self.on_ground = False
+    def update(self, key_lst: list[bool], screen: pg.Surface):
+        sum_mv = [0, 0]
+        for k, mv in __class__.delta.items():
+            if key_lst[k]:
+                sum_mv[0] += mv[0]
+                sum_mv[1] += mv[1]
 
-        self.velocity += self.gravity
-        self.rect.y += self.velocity
+        if key_lst[pg.K_UP] and not self.is_jumping:
+                self.is_jumping = True
+                self.jump_speed = 15
 
-        if self.rect.bottom >= HEIGHT:
-            self.rect.bottom = HEIGHT
-            self.velocity = 0
-            self.on_ground = True
-"""
-class Beam3(pg.sprite.Sprite):
-    
-  爆弾に関するクラス
-    
-    colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
+        if self.is_jumping: #ジャンプ中の処理
+            self.rct.y -= self.jump_speed
+            self.jump_speed -= self.gravity
+            if self.rct.bottom >= 700: #地面についたら
+                self.rct.bottom = 700
+                self.is_jumping = False
+                self.jump_speed = 15
+        #移動処理
+        self.rct.move_ip(sum_mv)
+        if not (sum_mv[0] == 0 and sum_mv[1] == 0):
+            self.img = __class__.imgs.get(tuple(sum_mv), self.img)
+        screen.blit(self.img, self.rct)
+ 
 
-    def __init__(self, emy: "Enemy", bird: Bird):
-        
-        爆弾円Surfaceを生成する
-        引数1 emy：爆弾を投下する敵機
-        引数2 bird：攻撃対象のこうかとん
-        
-        super().__init__()
-        rad = random.randint(10, 50)  # 爆弾円の半径：10以上50以下の乱数
-        self.image = pg.Surface((2*rad, 2*rad))
-        color = random.choice(__class__.colors)  # 爆弾円の色：クラス変数からランダム選択
-        pg.draw.circle(self.image, color, (rad, rad), rad)
-        self.image.set_colorkey((0, 0, 0))
-        self.rect = self.image.get_rect()
-        # 爆弾を投下するemyから見た攻撃対象のbirdの方向を計算
-        self.vx, self.vy = calc_orientation(emy.rect, bird.rect)  
-        self.rect.centerx = emy.rect.centerx
-        self.rect.centery = emy.rect.centery+emy.rect.height//2
-        self.speed = 6
 
-    def update(self):
-        
-        爆弾を速度ベクトルself.vx, self.vyに基づき移動させる
-        引数 screen：画面Surface
-        
-        self.rect.move_ip(self.speed*self.vx, self.speed*self.vy)
-        if check_bound(self.rect) != (True, True):
-            self.kill()
-"""
 class BeamAllen:
     """
     アレンが放つビームに関するクラス
@@ -107,44 +108,29 @@ class BeamAllen:
 
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
-    screen = pg.display.set_mode((800, 600))
+    screen = pg.display.set_mode((1200, 700))
     clock  = pg.time.Clock()
-    back_img = pg.image.load("fig/24535830.jpg") #背景画像
-    
-    allen = Allen()
-    all_sprites = pg.sprite.Group()
-    all_sprites.add(allen)
-
+    #背景画像をロードして、ウインドウのサイズにリサイズ
+    back_img = pg.image.load("fig/24535830.jpg") 
+    back_img = pg.transform.scale(back_img, (1200, 700))
+    allen = Allen((100, 600))
+    show_allen = True
     tmr = 0
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
-                return
-            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
-                beam = BeamAllen(Allen) 
-
-        x = tmr%3200
+                pg.quit()
+                sys.exit()
+            elif event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
+                show_allen = not show_allen #アレンの表示非表示の切替(キャラの切り替えで使うかも)
+        
         screen.blit(back_img, [0, 0]) #背景画像を表すsurfase
        
-        
         key_lst = pg.key.get_pressed()
-        x, y = 0, 0
-        if key_lst[pg.K_UP]:
-            x , y =0 ,-20
-        if key_lst[pg.K_DOWN]:
-            x, y= 0, 20
-        if key_lst[pg.K_RIGHT]:
-            x, y=20, 0
-        if key_lst[pg.K_LEFT]:
-            x, y=-20  , 0
-        
-        allen.rect.move_ip(x, y)
-        all_sprites.update()
+        if show_allen:
+            allen.update(key_lst, screen)
 
-        screen.blit(back_img, (0, 0))
-        all_sprites.draw(screen) 
         pg.display.update()
-        tmr += 1        
         clock.tick(60)
 
  
