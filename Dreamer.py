@@ -9,8 +9,8 @@ import pygame
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-WIDTH = 1200
-HEIGHT = 750
+WIDTH = 1600
+HEIGHT = 900
 
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     """
@@ -26,18 +26,18 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     return yoko, tate
 
 
-image_paths = [
-        'fig/gamen1.jpg',
-        'fig/gamen2.jpg',
-        'fig/gamen3.jpg',
-        'fig/gamen4.jpg',
-        'fig/gamen5.jpg',
-        'fig/gamen6.jpg'
+image_paths3 = [
+        'fig/gamen12.jpg',
+        'fig/gamen13.jpg',
+        'fig/gamen14.jpg',
+        'fig/gamen15.jpg',
+        'fig/gamen16.jpg',
+        'fig/gamen17.jpg'
     ]
 
 class StartScreen:
     def __init__(self, image_paths):
-        self.images = [pygame.image.load(path) for path in image_paths]
+        self.images = [pygame.image.load(path) for path in image_paths3]
         self.current_index = 0
     def next_image(self):
         if self.current_index < len(self.images) - 1:
@@ -54,7 +54,7 @@ class StartScreen:
 def main():
     pg.display.set_caption("Dreamer")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
-    start_screen=StartScreen(image_paths)
+    start_screen=StartScreen(image_paths3)
     running = True
     clock  = pg.time.Clock()
     beamallen = None
@@ -71,12 +71,11 @@ def main():
                 pg.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    start_screen.next_image()
+                if event.key == pygame.K_b:
                     if not start_screen.next_image():  # 次の画像に進めなかった場合
-                        running = False 
-            elif event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
-                show_allen = not show_allen #アレンの表示非表示の切替(キャラの切り替えで使うかも)
+                        running = False
+                elif event.key == pygame.K_b:
+                    show_allen = not show_allen  # アレンの表示非表示の切替(キャラの切り替えで使うかも)
         
         
         current_image = start_screen.get_next_screen()
