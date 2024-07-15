@@ -121,6 +121,8 @@ def main():
             if event.type == pg.QUIT: 
                 pg.quit()
                 sys.exit()
+            if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                beam = BeamAllen(Allen)            
             elif event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
                 show_allen = not show_allen #アレンの表示非表示の切替(キャラの切り替えで使うかも)
         
