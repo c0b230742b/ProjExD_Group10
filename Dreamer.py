@@ -26,7 +26,7 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
 class Allen(pg.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pg.transform.rotozoom(pg.image.load("fig/スクリーンショット 2024-07-09 145858.png"), 0, 0.9)
+        self.image = pg.transform.rotozoom(pg.image.load("fig/allen_file"), 0, 0.9)
         self.rect = self.image.get_rect()
         self.rect.center = 300, 200
         self.gravity = 1
