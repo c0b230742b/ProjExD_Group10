@@ -4,11 +4,13 @@ import random
 import sys
 import time
 import pygame as pg
+import pygame
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-WIDTH = 1100
-HEIGHT = 650
+
+WIDTH = 1200
+HEIGHT = 750
 
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     """
@@ -23,82 +25,68 @@ def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
-class Beam3(pg.sprite.Sprite):
-    """
-    爆弾に関するクラス
-    """
-    colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255), (0, 255, 255)]
 
-    def __init__(self, emy: "Enemy", bird: Bird):
-        """
-        爆弾円Surfaceを生成する
-        引数1 emy：爆弾を投下する敵機
-        引数2 bird：攻撃対象のこうかとん
-        """
-        super().__init__()
-        rad = random.randint(10, 50)  # 爆弾円の半径：10以上50以下の乱数
-        self.image = pg.Surface((2*rad, 2*rad))
-        color = random.choice(__class__.colors)  # 爆弾円の色：クラス変数からランダム選択
-        pg.draw.circle(self.image, color, (rad, rad), rad)
-        self.image.set_colorkey((0, 0, 0))
-        self.rect = self.image.get_rect()
-        # 爆弾を投下するemyから見た攻撃対象のbirdの方向を計算
-        self.vx, self.vy = calc_orientation(emy.rect, bird.rect)  
-        self.rect.centerx = emy.rect.centerx
-        self.rect.centery = emy.rect.centery+emy.rect.height//2
-        self.speed = 6
+image_paths = [
+        'fig/gamen1.jpg',
+        'fig/gamen2.jpg',
+        'fig/gamen3.jpg',
+        'fig/gamen4.jpg',
+        'fig/gamen5.jpg',
+        'fig/gamen6.jpg'
+    ]
 
-    def update(self):
-        """
-        爆弾を速度ベクトルself.vx, self.vyに基づき移動させる
-        引数 screen：画面Surface
-        """
-        self.rect.move_ip(self.speed*self.vx, self.speed*self.vy)
-        if check_bound(self.rect) != (True, True):
-            self.kill()
+class StartScreen:
+    def __init__(self, image_paths):
+        self.images = [pygame.image.load(path) for path in image_paths]
+        self.current_index = 0
+    def next_image(self):
+        if self.current_index < len(self.images) - 1:
+            self.current_index += 1
+            return True
+        return False 
+    
+    def get_next_screen(self):
+        return self.images[self.current_index]
+    
+    
+
 
 def main():
-    pg.display.set_caption("はばたけ！こうかとん")
-    screen = pg.display.set_mode((800, 600))
+    pg.display.set_caption("Dreamer")
+    screen = pg.display.set_mode((WIDTH, HEIGHT))
+    start_screen=StartScreen(image_paths)
+    running = True
     clock  = pg.time.Clock()
-    bg_img = pg.image.load("fig/pg_bg.jpg") #背景画像
-    bg_img2 = pg.transform.flip(bg_img, True, False) #背景画像
-    kk_img = pg.image.load("fig/3.png")
-    kk_img = pg.transform.flip(kk_img, True, False)
-    kk_rect = kk_img.get_rect() #こうかとんrectの抽出
-    kk_rect.center = 300, 200
+    beamallen = None
+    #背景画像をロードして、ウインドウのサイズにリサイズ
+    #allen = Allen((100, 600))
+    show_allen = True
     tmr = 0
+    current_image = start_screen.get_next_screen()
+    screen.blit(current_image, (WIDTH // 2 - current_image.get_width() // 2, HEIGHT // 2 - current_image.get_height() // 2))
+
     while True:
         for event in pg.event.get():
-            if event.type == pg.QUIT: return
-
-        x = tmr%3200
-        screen.blit(bg_img, [-x, 0]) #背景画像を表すsurfase
-        screen.blit(bg_img2, [-x+1600, 0])
-        screen.blit(bg_img, [-x+3200, 0]) #背景画像を表すsurfase
-        screen.blit(bg_img2, [-x+4800, 0])
+            if event.type == pg.QUIT: 
+                pg.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    start_screen.next_image()
+                    if not start_screen.next_image():  # 次の画像に進めなかった場合
+                        running = False 
+            elif event.type == pg.KEYDOWN and event.key == pg.K_RETURN:
+                show_allen = not show_allen #アレンの表示非表示の切替(キャラの切り替えで使うかも)
         
-        kye_lst = pg.key.get_pressed()
-        if kye_lst[pg.K_UP]: #上矢印を押したとき
-            a = -1
-            b = -1
-        elif kye_lst[pg.K_DOWN]:
-            a = -1
-            b = +1
-        elif kye_lst[pg.K_LEFT]:
-            a = -1
-            b = 0
-        elif kye_lst[pg.K_RIGHT]:
-            a = +2
-            b = 0
-        else:
-            a = -1
-            b = 0
-        kk_rect.move_ip(a, b)
-        screen.blit(kk_img, kk_rect) #kk_imageをkk_rectの設定に従って貼り付け
+        
+        current_image = start_screen.get_next_screen()
+        screen.blit(current_image, (WIDTH // 2 - current_image.get_width() // 2, HEIGHT // 2 - current_image.get_height() // 2))
+        key_lst = pg.key.get_pressed()
+
         pg.display.update()
-        tmr += 1        
-        clock.tick(200)
+        clock.tick(60)
+
+ 
 
 
 if __name__ == "__main__":
