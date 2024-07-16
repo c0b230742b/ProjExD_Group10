@@ -178,11 +178,11 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pg.K_s: #sキーを押すことでスタート画面に移行
                     in_start_screen = True
-                if event.key == pg.K_a: #sキーを押すことでスタート画面に移行
+                if event.key == pg.K_a: #aキーを押すことでミカ登場画面に移行
                     in_start_screen1 = True
-                if event.key == pg.K_b: #sキーを押すことでスタート画面に移行
+                if event.key == pg.K_b: #bキーを押すことでミカ撃退画面に移行
                     in_start_screen2 = True
-                if event.key == pg.K_c: #sキーを押すことでスタート画面に移行
+                if event.key == pg.K_c: #cキーを押すことでこうかとん撃退後画面に移行
                     in_start_screen3 = True
                 if event.key == pg.K_RETURN and in_start_screen:#エンターキーを押すことで次の画面に映る
                     if not start_screen.next_image():
@@ -196,6 +196,8 @@ def main():
                 if event.key == pg.K_RETURN and in_start_screen3:#エンターキーを押すことで次の画面に映る
                     if not start_screen3.next_image():
                         in_start_screen3 = False
+                        time.sleep(5)
+                        return
                 if event.key == pg.K_s and in_start_screen:
                     start_screen = StartScreen(image_paths)
                 if event.key == pg.K_a and in_start_screen1:
