@@ -196,6 +196,7 @@ class BeamAllen:
         self.rct.centery = Allen.rct.centery  # アレンの中心縦座標をビームの中心縦座標に設定
         self.rct.left = Allen.rct.right  # アレン右座標をビーム左座標に設定
         self.vx, self.vy = +5, 0
+        
 
     def update(self, screen: pg.Surface):
         """
@@ -699,6 +700,75 @@ class Midboss(pg.sprite.Sprite):
         """
         self.start_music()
 
+class Mika:
+    delta = {  # 押下キーと移動量の辞書
+        pg.K_LEFT: (-10, 0),
+        pg.K_RIGHT: (+10, 0),
+        pg.K_UP: (0, -10),   # 上方向への移動を追加
+        pg.K_DOWN: (0, 10),  # 下方向への移動を追加
+    }
+
+    imgs = {
+        (+5, 0): pg.transform.rotozoom(pg.image.load("fig/mika.png"), 0, 0.4),   # 初期画像を指定してください
+        (-10, 0): pg.transform.rotozoom(pg.image.load("fig/mika(0).png"), 0, 0.4),
+        (+10, 0): pg.transform.rotozoom(pg.image.load("fig/mika(1).png"), 0, 0.4),
+        (0, -10): pg.transform.rotozoom(pg.image.load("fig/mika(2).png"), 0, 0.4),   #上向き
+        (0, 10): pg.transform.rotozoom(pg.image.load("fig/mika.png"), 0, 0.4), #下向き
+    }
+
+    def __init__(self, xy: tuple[int, int]):
+        """
+        こうかとん画像Surfaceを生成する
+        引数 xy：こうかとん画像の初期位置座標タプル
+        """
+        self.img = __class__.imgs[(+5, 0)]
+        self.rct: pg.Rect = self.img.get_rect()
+        self.rct.center = xy
+        self.max_hp = 100         # 最大HP
+        self.current_hp = 100     # 現在のHP
+
+    def change_img(self, num: int, screen: pg.Surface):
+        self.image = pg.transform.rotozoom(pg.image.load(f"fig/file({num}).png"), 0, 4.0)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.rct.center
+        screen.blit(self.image, self.rect)
+
+    def update(self, key_lst: list[bool], screen: pg.Surface):
+        sum_mv = [0, 0]
+        for k, mv in __class__.delta.items():
+            if key_lst[k]:
+                sum_mv[0] += mv[0]
+                sum_mv[1] += mv[1]
+        
+        prev_rect = self.rct.copy()
+
+        self.rct.move_ip(sum_mv)
+
+        if self.rct.left < 0:
+            self.rct.left = 0
+        elif self.rct.right > screen.get_width():
+            self.rct.right = screen.get_width()
+
+        if not (sum_mv[0] == 0 and sum_mv[1] == 0):
+            self.img = __class__.imgs.get(tuple(sum_mv), self.img)
+        
+        if self.rct.top < 0:
+            self.rct.top = 0
+        elif self.rct.bottom > screen.get_height():
+            self.rct.bottom = screen.get_height()
+
+        # 移動が成功した場合、前回の位置を更新
+        if self.rct.topleft == prev_rect.topleft:
+            self.rct.topleft = prev_rect.topleft
+
+        screen.blit(self.img, self.rct)
+
+    def take_damage(self, amount):
+        self.current_hp -= amount
+        if self.current_hp <= 0:
+            self.current_hp = 0
+            
+
 def main():
     pg.display.set_caption("はばたけ！こうかとん")
     screen = pg.display.set_mode((1600, 900))
@@ -710,13 +780,13 @@ def main():
     allen = Allen((100, 500))
     frame = Frame()
     show_hiroin = False
-    show_allen = True
+    show_allen = False
 
     player_hp = HP(50, 50, 100)
     beam_list = []  # ビームのリストを初期化
 
     start_screen=StartScreen(image_paths)
-    in_start_screen = False
+    in_start_screen = True
     current_image = start_screen.get_next_screen()
 
     start_screen1=StartScreen(image_paths1)
@@ -777,8 +847,8 @@ def main():
                     show_hiroin = True
                     hiroin.rct.center = allen.rct.center
                 elif event.key == pg.K_h and show_hiroin:
-                    player_hp.heal(30)
-                    hiroin.heal(30)
+                    #player_hp.heal(30)
+                    #hiroin.heal(30)
                     show_hiroin = False
                     show_allen = True
                 elif event.key == pg.K_SPACE and show_allen:
@@ -789,8 +859,12 @@ def main():
                     in_start_screen = True
                 if event.key == pg.K_a: #aキーを押すことでミカ登場画面に移行
                     in_start_screen1 = True
+                    back_img = pg.image.load("fig/24535848.jpg")
+                    back_img = pg.transform.scale(back_img, (1600, 900))
                 if event.key == pg.K_b: #bキーを押すことでミカ撃退画面に移行
                     in_start_screen2 = True
+                    back_img = pg.image.load("fig/23300955.jpg")
+                    back_img = pg.transform.scale(back_img, (1600, 900))
                 if event.key == pg.K_c: #cキーを押すことでこうかとん撃退後画面に移行
                     in_start_screen3 = True   
                 if event.key == pg.K_RETURN and in_start_screen:#エンターキーを押すことで次の画面に映る
