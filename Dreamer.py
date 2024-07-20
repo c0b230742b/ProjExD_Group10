@@ -8,7 +8,7 @@ import math
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 WIDTH = 1600
 HEIGHT = 900
-
+ 
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     yoko, tate = True, True
     if obj_rct.left < 0 or WIDTH < obj_rct.right:
@@ -616,9 +616,9 @@ def main():
     show_hiroin = False
     show_allen = True
 
-    player_hp = HP(50, 50, 1000)
+    player_hp = HP(50, 50, 10000)
     beam_group = pg.sprite.Group()
- 
+
     start_screen = StartScreen(image_paths)
     in_start_screen = True
     current_image = start_screen.get_next_screen()
@@ -637,7 +637,7 @@ def main():
 
     b_enemy = Bigenemy(800, 300)
     s_enemy = Smallenemy(1100, 650)
-    m_enemy = Midboss(WIDTH-100, 400)
+    m_enemy = Midboss(WIDTH - 100, 400)
 
     enemies = [s_enemy, m_enemy, b_enemy]
     current_enemy = 0
@@ -660,12 +660,17 @@ def main():
                     current_enemy = (current_enemy + 1) % len(enemies)
                     enemy_group = pg.sprite.Group(enemies[current_enemy])
 
+                    # Clear the ally beam group when switching to a new enemy
+                    beam_group.empty()
+
                     if isinstance(enemies[current_enemy], Bigenemy):
                         enemies[current_enemy].switch_to_bigboss()
+                        player_hp.current_hp = player_hp.max_hp  # Restore player HP
                     elif isinstance(enemies[current_enemy], Smallenemy):
                         enemies[current_enemy].switch_to_smallboss()
                     elif isinstance(enemies[current_enemy], Midboss):
                         enemies[current_enemy].switch_to_midboss()
+                        player_hp.current_hp = player_hp.max_hp  # Restore player HP
                     enemies[current_enemy].start_music()
 
                     enemy_beams.empty()
@@ -685,20 +690,6 @@ def main():
                 elif event.key == pg.K_SPACE and show_allen:
                     beamallen = BeamAllen(allen)
                     beam_group.add(beamallen)
-                """
-                if event.key == pg.K_s:
-                    in_start_screen = True
-                if event.key == pg.K_a:
-                    in_start_screen1 = True
-                    back_img = pg.image.load("fig/24535848.jpg")
-                    back_img = pg.transform.scale(back_img, (1600, 900))
-                if event.key == pg.K_b:
-                    in_start_screen2 = True
-                    back_img = pg.image.load("fig/23300955.jpg")
-                    back_img = pg.transform.scale(back_img, (1600, 900))
-                if event.key == pg.K_c:
-                    in_start_screen3 = True   
-                """
                 if event.key == pg.K_RETURN:
                     if in_start_screen and not start_screen.next_image():
                         in_start_screen = False
@@ -713,7 +704,7 @@ def main():
                     if in_start_screen3 and not start_screen3.next_image():
                         in_start_screen3 = False
                         time.sleep(5)
-                        return   
+                        return
                 if event.key == pg.K_s and in_start_screen:
                     start_screen = StartScreen(image_paths)
                 if event.key == pg.K_a and in_start_screen1:
@@ -721,7 +712,7 @@ def main():
                 if event.key == pg.K_b and in_start_screen2:
                     start_screen2 = StartScreen(image_paths2)
                 if event.key == pg.K_c and in_start_screen3:
-                    start_screen3 = StartScreen(image_paths3)  
+                    start_screen3 = StartScreen(image_paths3)
                 if event.key == pg.K_p:
                     enemies[current_enemy].hp.take_damage(10)
 
@@ -729,31 +720,35 @@ def main():
 
         if in_start_screen:
             current_image = start_screen.get_next_screen()
-            screen.blit(current_image, (WIDTH // 2 - current_image.get_width() // 2, HEIGHT // 2 - current_image.get_height() // 2))
+            screen.blit(current_image,
+                        (WIDTH // 2 - current_image.get_width() // 2, HEIGHT // 2 - current_image.get_height() // 2))
             show_hiroin = False
             show_allen = False
         elif in_start_screen1:
             current_image1 = start_screen1.get_next_screen()
-            screen.blit(current_image1, (WIDTH // 2 - current_image1.get_width() // 2, HEIGHT // 2 - current_image1.get_height() // 2))
+            screen.blit(current_image1, (
+                WIDTH // 2 - current_image1.get_width() // 2, HEIGHT // 2 - current_image1.get_height() // 2))
             show_hiroin = False
             show_allen = False
         elif in_start_screen2:
             current_image2 = start_screen2.get_next_screen()
-            screen.blit(current_image2, (WIDTH // 2 - current_image2.get_width() // 2, HEIGHT // 2 - current_image2.get_height() // 2))
+            screen.blit(current_image2, (
+                WIDTH // 2 - current_image2.get_width() // 2, HEIGHT // 2 - current_image2.get_height() // 2))
             show_hiroin = False
             show_allen = False
         elif in_start_screen3:
             current_image3 = start_screen3.get_next_screen()
-            screen.blit(current_image3, (WIDTH // 2 - current_image3.get_width() // 2, HEIGHT // 2 - current_image3.get_height() // 2))
+            screen.blit(current_image3, (
+                WIDTH // 2 - current_image3.get_width() // 2, HEIGHT // 2 - current_image3.get_height() // 2))
             show_hiroin = False
             show_allen = False
         else:
-            screen.blit(back_img, (0, 0))  
+            screen.blit(back_img, (0, 0))
             show_allen = True
-            #show_hiroin = False
+            show_hiroin = False
             player_hp.draw(screen, hiroin.rect if show_hiroin else allen.rect)
             frame.draw(screen, show_hiroin, show_allen)
-        
+
         key_lst = pg.key.get_pressed()
         if show_hiroin:
             hiroin.update(key_lst, screen)
@@ -781,7 +776,7 @@ def main():
             # ボスのHPを描画
             if isinstance(enemies[current_enemy], (Bigenemy, Midboss, Smallenemy)):
                 enemies[current_enemy].draw_hp(screen)
-            
+
             if player_hp.current_hp <= 0:
                 game_over_screen = True
 
@@ -801,12 +796,17 @@ def main():
                 current_enemy = (current_enemy + 1) % len(enemies)
                 enemy_group = pg.sprite.Group(enemies[current_enemy])
 
+                # Clear the ally beam group when switching to a new enemy
+                beam_group.empty()
+
                 if isinstance(enemies[current_enemy], Bigenemy):
                     enemies[current_enemy].switch_to_bigboss()
+                    player_hp.current_hp = player_hp.max_hp  # Restore player HP
                 elif isinstance(enemies[current_enemy], Smallenemy):
                     enemies[current_enemy].switch_to_smallboss()
                 elif isinstance(enemies[current_enemy], Midboss):
                     enemies[current_enemy].switch_to_midboss()
+                    player_hp.current_hp = player_hp.max_hp  # Restore player HP
                 enemies[current_enemy].start_music()
 
                 enemy_beams.empty()
@@ -817,7 +817,8 @@ def main():
                 elif current_enemy == 0:
                     in_start_screen3 = True
             elif game_over_screen:  # ゲームオーバー画面を描画
-                screen.blit(game_over_image, (WIDTH // 2 - game_over_image.get_width() // 2, HEIGHT // 2 - game_over_image.get_height() // 2))
+                screen.blit(game_over_image, (
+                    WIDTH // 2 - game_over_image.get_width() // 2, HEIGHT // 2 - game_over_image.get_height() // 2))
                 pg.display.flip()
                 time.sleep(5)
                 return
