@@ -8,7 +8,7 @@ import math
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 WIDTH = 1600
 HEIGHT = 900
- 
+
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     yoko, tate = True, True
     if obj_rct.left < 0 or WIDTH < obj_rct.right:
@@ -616,7 +616,7 @@ def main():
     show_hiroin = False
     show_allen = True
 
-    player_hp = HP(50, 50, 10000)
+    player_hp = HP(50, 50, 500)
     beam_group = pg.sprite.Group()
 
     start_screen = StartScreen(image_paths)
@@ -655,36 +655,21 @@ def main():
             if event.type == pg.QUIT:
                 return
             if event.type == pg.KEYDOWN:
+                
+                if event.key == pg.K_LSHIFT:
+                    if show_allen:
+                        show_hiroin = True
+                        show_allen = False
+                        allen.rect.center = hiroin.rect.center
                 if event.key == pg.K_RSHIFT:
-                    enemies[current_enemy].stop_music()
-                    current_enemy = (current_enemy + 1) % len(enemies)
-                    enemy_group = pg.sprite.Group(enemies[current_enemy])
-
-                    # Clear the ally beam group when switching to a new enemy
-                    beam_group.empty()
-
-                    if isinstance(enemies[current_enemy], Bigenemy):
-                        enemies[current_enemy].switch_to_bigboss()
-                        player_hp.current_hp = player_hp.max_hp  # Restore player HP
-                    elif isinstance(enemies[current_enemy], Smallenemy):
-                        enemies[current_enemy].switch_to_smallboss()
-                    elif isinstance(enemies[current_enemy], Midboss):
-                        enemies[current_enemy].switch_to_midboss()
-                        player_hp.current_hp = player_hp.max_hp  # Restore player HP
-                    enemies[current_enemy].start_music()
-
-                    enemy_beams.empty()
-                if event.key == pg.K_2 and show_hiroin:
-                    show_hiroin = False
-                    show_allen = True
-                    allen.rect.center = hiroin.rect.center
-                elif event.key == pg.K_3 and show_allen:
-                    show_allen = False
-                    show_hiroin = True
-                    hiroin.rect.center = allen.rect.center
+                    if show_hiroin:
+                        show_hiroin = False
+                        show_allen = True
+                        hiroin.rect.center = allen.rect.center
                 elif event.key == pg.K_h and show_hiroin:
-                    player_hp.heal(30)
-                    hiroin.heal(30)
+                    player_hp.heal(100)
+                    hiroin.heal(100)
+                    allen.rect.center = hiroin.rect.center
                     show_hiroin = False
                     show_allen = True
                 elif event.key == pg.K_SPACE and show_allen:
@@ -745,7 +730,7 @@ def main():
         else:
             screen.blit(back_img, (0, 0))
             show_allen = True
-            show_hiroin = False
+            #show_hiroin = False
             player_hp.draw(screen, hiroin.rect if show_hiroin else allen.rect)
             frame.draw(screen, show_hiroin, show_allen)
 
@@ -831,3 +816,5 @@ if __name__ == "__main__":
     main()
     pg.quit()
     sys.exit()
+
+
