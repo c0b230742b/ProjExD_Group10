@@ -604,7 +604,7 @@ class Midboss(pg.sprite.Sprite):
         self.hp.draw(screen, self.rect)
 
 def main():
-    pg.display.set_caption("はばたけ！こうかとん")
+    pg.display.set_caption("Dremer")
     screen = pg.display.set_mode((1600, 900))
     clock = pg.time.Clock()
     back_img = pg.image.load("fig/24535830.jpg")
@@ -616,7 +616,7 @@ def main():
     show_hiroin = False
     show_allen = True
 
-    player_hp = HP(50, 50, 500)
+    player_hp = HP(50, 50, 1000)
     beam_group = pg.sprite.Group()
 
     start_screen = StartScreen(image_paths)
@@ -690,17 +690,7 @@ def main():
                         in_start_screen3 = False
                         time.sleep(5)
                         return
-                if event.key == pg.K_s and in_start_screen:
-                    start_screen = StartScreen(image_paths)
-                if event.key == pg.K_a and in_start_screen1:
-                    start_screen1 = StartScreen(image_paths1)
-                if event.key == pg.K_b and in_start_screen2:
-                    start_screen2 = StartScreen(image_paths2)
-                if event.key == pg.K_c and in_start_screen3:
-                    start_screen3 = StartScreen(image_paths3)
-                if event.key == pg.K_p:
-                    enemies[current_enemy].hp.take_damage(10)
-
+        
         screen.blit(back_img, [0, 0])
 
         if in_start_screen:
